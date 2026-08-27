@@ -2494,7 +2494,7 @@ function startFreeExamWithoutId() {
     const studentIdInput = document.getElementById('student-id');
     if (studentIdInput) {
         studentIdInput.removeAttribute('required');
-        studentIdInput.value = "PHONE_" + phoneNumber;
+        studentIdInput.value = phoneNumber;
     }
 
     const studentNameInput = document.getElementById('student-name');

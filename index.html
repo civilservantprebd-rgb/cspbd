@@ -464,8 +464,7 @@
             <div id="teacher-tab-student-ids" class="hidden space-y-5">
                 <div class="bg-indigo-50 p-4 sm:p-5 rounded-2xl border border-indigo-100 space-y-3">
                     <h3 class="font-bold text-indigo-900 text-xs sm:text-sm"><i class="fa-solid fa-user-plus mr-1.5"></i> অনুমোদিত শিক্ষার্থী (আইডি ও নাম) যোগ করুন</h3>
-                    <!-- স্টুডেন্ট আইডি যোগ করার ফর্ম -->
-                    <form onsubmit="handleAddStudentId(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <form onsubmit="handleAddStudentId(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
                         <div>
                             <label class="block text-[11px] font-medium text-slate-700 mb-1">স্টুডেন্ট আইডি</label>
                             <input type="text" id="new-student-id-input" required placeholder="যেমন: 202601" class="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs sm:text-sm bg-white">
@@ -474,14 +473,8 @@
                             <label class="block text-[11px] font-medium text-slate-700 mb-1">শিক্ষার্থীর নাম</label>
                             <input type="text" id="new-student-name-input" required placeholder="যেমন: আব্দুর রহিম" class="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs sm:text-sm bg-white">
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-medium text-slate-700 mb-1">অনুমোদিত কোর্স</label>
-                            <select id="new-student-course-select" class="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs sm:text-sm bg-white">
-                                <!-- জাভাস্ক্রিপ্ট দিয়ে অপশন অটোমেটিক লোড হবে -->
-                            </select>
-                        </div>
-                        <div class="sm:col-span-3">
-                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl text-xs sm:text-sm transition shadow cursor-pointer">
+                        <div class="sm:col-span-2">
+                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl text-xs sm:text-sm transition shadow">
                                 তালিকাভুক্ত করুন
                             </button>
                         </div>
@@ -649,38 +642,6 @@
 
     <!-- Modals Structure -->
     
-    <!-- স্টুডেন্ট আইডি ও কোর্স এডিট পপআপ মোডাল -->
-<div id="edit-student-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl space-y-4">
-        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-            <h3 class="font-bold text-slate-900 text-sm sm:text-base"><i class="fa-solid fa-user-pen text-indigo-600 mr-1.5"></i> শিক্ষার্থী তথ্য ও কোর্স এডিট</h3>
-            <button onclick="closeEditStudentModal()" class="text-slate-400 hover:text-slate-700 text-lg cursor-pointer">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <form onsubmit="handleUpdateStudent(event)" class="space-y-3">
-            <input type="hidden" id="edit-student-idx">
-            <div>
-                <label class="block text-xs font-medium text-slate-700 mb-1">স্টুডেন্ট আইডি / রোল</label>
-                <input type="text" id="edit-student-id" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm font-mono">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-700 mb-1">শিক্ষার্থীর নাম</label>
-                <input type="text" id="edit-student-name" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-700 mb-1">অনুমোদিত কোর্স</label>
-                <select id="edit-student-course" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-white"></select>
-            </div>
-            <div class="flex gap-2 pt-2">
-                <button type="button" onclick="closeEditStudentModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-xl text-xs sm:text-sm cursor-pointer">বাতিল</button>
-                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-xl text-xs sm:text-sm shadow cursor-pointer">আপডেট করুন</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-
     <!-- এনরোল পপআপ মোডাল -->
     <div id="enroll-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
@@ -1479,96 +1440,90 @@
         }
 
         async function beginQuiz(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    const rawName = document.getElementById("student-name").value.trim();
-    const rawId = document.getElementById("student-id").value.trim();
-
-    const exam = appData.exams[activeExamKey];
-    if(!exam || !exam.questions || exam.questions.length === 0) {
-        showModal("ত্রুটি", "এই পরীক্ষায় কোনো প্রশ্ন নেই!");
-        return;
-    }
-
-    let matchedStudent = null;
-    if (!exam.isFree) {
-        if (!appData.allowedStudentIds || appData.allowedStudentIds.length === 0) {
-            showModal("সতর্কতা", "শিক্ষক প্যানেলে কোনো অনুমোদিত স্টুডেন্ট আইডি যুক্ত করা হয়নি।");
-            return;
-        }
-
-        matchedStudent = appData.allowedStudentIds.find(item => String(item.id).trim() === String(rawId).trim());
-        if (!matchedStudent) {
-            showModal("অনুমতি নেই", "আপনার স্টুডেন্ট আইডিটি সিস্টেমে পাওয়া যায়নি। সঠিক আইডি দিন।");
-            return;
-        }
-
-        // 🔥 কোর্স ভিত্তিক এক্সেস ভেরিফিকেশন 🔥
-        const studentCourses = matchedStudent.courses || (matchedStudent.course ? [matchedStudent.course] : ["ALL"]);
-        const hasCourseAccess = studentCourses.includes("ALL") || studentCourses.includes(exam.course);
-
-        if (!hasCourseAccess) {
-            showModal("কোর্স এক্সেস সীমাবদ্ধ", `দুঃখিত! আপনার আইডিটি "${exam.course}" কোর্সের জন্য অনুমোদিত নয়। আপনি কেবল আপনার ভর্তিকৃত কোর্সের পরীক্ষায় অংশ নিতে পারবেন।`);
-            return;
-        }
-    }
-
-    // লাইভ চলাকালীন ডাবল সাবমিশন চেক
-    const checkId = rawId || (matchedStudent ? matchedStudent.id : "");
-    if (isExamCurrentlyLive(activeExamKey) && checkId) {
-        if (window.db && window.fbFS) {
-            try {
-                const snapshot = await window.fbFS.getDocs(window.fbFS.collection(window.db, "submissions"));
-                let alreadySubmitted = false;
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (String(data.studentId).trim() === String(checkId).trim() && data.examKey === activeExamKey) {
-                        alreadySubmitted = true;
-                    }
-                });
-
-                if (alreadySubmitted) {
-                    showModal("অনুমতি নেই", "আপনি ইতিমধ্যে এই লাইভ পরীক্ষায় অংশগ্রহণ করেছেন! লাইভ চলাকালীন একাধিকবার পরীক্ষা দেওয়া যাবে না।");
+            if (e && e.preventDefault) e.preventDefault();
+            const rawName = document.getElementById("student-name").value.trim();
+            const rawId = document.getElementById("student-id").value.trim();
+        
+            const exam = appData.exams[activeExamKey];
+            if(!exam || !exam.questions || exam.questions.length === 0) {
+                showModal("ত্রুটি", "এই পরীক্ষায় কোনো প্রশ্ন নেই!");
+                return;
+            }
+        
+            let matchedStudent = null;
+            if (!exam.isFree) {
+                if (!appData.allowedStudentIds || appData.allowedStudentIds.length === 0) {
+                    showModal("সতর্কতা", "শিক্ষক প্যানেলে কোনো অনুমোদিত স্টুডেন্ট আইডি যুক্ত করা হয়নি।");
                     return;
                 }
-            } catch (err) {
-                console.error("Submission check error:", err);
+                matchedStudent = appData.allowedStudentIds.find(item => String(item.id).trim() === String(rawId).trim());
+                if (!matchedStudent) {
+                    showModal("অনুমতি নেই", "আপনার স্টুডেন্ট আইডিটি এই পরীক্ষার জন্য অনুমোদিত নয়। সঠিক আইডি দিয়ে চেষ্টা করুন।");
+                    return;
+                }
             }
-        }
-    }
-
-    let foundStudentName = rawName;
-    if (matchedStudent && matchedStudent.name) {
-        foundStudentName = matchedStudent.name;
-    } else if (!foundStudentName) {
-        foundStudentName = rawId ? `আইডি: ${rawId}` : "পরীক্ষার্থী";
-    }
-
-    currentStudent = {
-        name: foundStudentName,
-        id: rawId || "ফ্রি-ইউজার"
-    };
-
-    currentExamQuestions = [...exam.questions];
-    studentAnswers = new Array(currentExamQuestions.length).fill(null);
-
-    document.getElementById("quiz-exam-heading").innerText = `${exam.title} (${exam.course} - ${exam.subject})`;
-    timeRemaining = exam.timerMinutes * 60;
-    updateTimerDisplay();
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timeRemaining--;
-        updateTimerDisplay();
-        if (timeRemaining <= 0) {
+        
+            // ========================================================
+            // 🔥 লাইভ পরীক্ষা চলাকালীন ২য় বার সাবমিশন ঠেকানোর লজিক
+            // ========================================================
+            const checkId = rawId || (matchedStudent ? matchedStudent.id : "");
+            if (isExamCurrentlyLive(activeExamKey) && checkId) {
+                if (window.db && window.fbFS) {
+                    try {
+                        const snapshot = await window.fbFS.getDocs(window.fbFS.collection(window.db, "submissions"));
+                        let alreadySubmitted = false;
+                        
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            if (String(data.studentId).trim() === String(checkId).trim() && data.examKey === activeExamKey) {
+                                alreadySubmitted = true;
+                            }
+                        });
+        
+                        if (alreadySubmitted) {
+                            showModal("অনুমতি নেই", "আপনি ইতিমধ্যে এই লাইভ পরীক্ষায় অংশগ্রহণ করেছেন! লাইভ পরীক্ষা চলাকালীন একাধিকবার পরীক্ষা দেওয়া যাবে না। লাইভ শেষ হওয়ার পর আপনি যতবার খুশি প্র্যাকটিস করতে পারবেন।");
+                            return;
+                        }
+                    } catch (err) {
+                        console.error("Live exam submission check failed:", err);
+                    }
+                }
+            }
+            // ========================================================
+        
+            let foundStudentName = rawName;
+            if (matchedStudent && matchedStudent.name) {
+                foundStudentName = matchedStudent.name;
+            } else if (!foundStudentName) {
+                foundStudentName = rawId ? `আইডি: ${rawId}` : "পরীক্ষার্থী";
+            }
+        
+            currentStudent = {
+                name: foundStudentName,
+                id: rawId || "ফ্রি-ইউজার"
+            };
+        
+            currentExamQuestions = [...exam.questions];
+            studentAnswers = new Array(currentExamQuestions.length).fill(null);
+        
+            document.getElementById("quiz-exam-heading").innerText = `${exam.title} (${exam.course} - ${exam.subject})`;
+            timeRemaining = exam.timerMinutes * 60;
+            updateTimerDisplay();
+        
             clearInterval(timerInterval);
-            showModal("সময় শেষ!", "আপনার পরীক্ষার জন্য নির্ধারিত সময় শেষ হয়ে গেছে। এখন উত্তরপত্র স্বয়ংক্রিয়ভাবে জমা হবে।");
-            finishQuiz();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    showModal("সময় শেষ!", "আপনার পরীক্ষার জন্য নির্ধারিত সময় শেষ হয়ে গেছে। এখন উত্তরপত্র স্বয়ংক্রিয়ভাবে জমা হবে।");
+                    finishQuiz();
+                }
+            }, 1000);
+        
+            renderAllQuestions();
+            switchView("exam");
         }
-    }, 1000);
-
-    renderAllQuestions();
-    switchView("exam");
-}
 
         function updateTimerDisplay() {
             const m = Math.floor(timeRemaining / 60);
@@ -1631,71 +1586,70 @@
         }
 
         async function finishQuiz() {
-    clearInterval(timerInterval);
-    const exam = appData.exams[activeExamKey];
-    let correct = 0, incorrect = 0;
+            clearInterval(timerInterval);
+            const exam = appData.exams[activeExamKey];
+            let correct = 0, incorrect = 0;
+            let detailedReview = [];
 
-    studentAnswers.forEach((ans, idx) => {
-        const questionObj = currentExamQuestions[idx];
-        if (ans !== null) {
-            const isCorrect = (ans === questionObj.correct);
-            if (isCorrect) correct++;
-            else incorrect++;
+            studentAnswers.forEach((ans, idx) => {
+                const questionObj = currentExamQuestions[idx];
+                
+                if (ans !== null) {
+                    const isCorrect = (ans === questionObj.correct);
+                    if (isCorrect) {
+                        correct++;
+                    } else {
+                        incorrect++;
+                    }
+                } 
+
+                detailedReview.push({
+                    question: questionObj.q,
+                    yourAnswer: ans !== null ? questionObj.opts[ans] : "উত্তর দেওয়া হয়নি",
+                    correctAnswer: questionObj.opts[questionObj.correct],
+                    isCorrect: ans !== null && ans === questionObj.correct,
+                    explanation: questionObj.exp
+                });
+            });
+
+            const score = Math.max(0, correct - (incorrect * 0.5));
+            const timeTakenSecs = (exam.timerMinutes * 60) - timeRemaining;
+            const mins = Math.floor(timeTakenSecs / 60);
+            const secs = timeTakenSecs % 60;
+            const timeFormatted = `${mins} মি. ${secs} সে.`;
+
+            const submission = {
+                studentName: currentStudent.name,
+                studentId: currentStudent.id,
+                examKey: activeExamKey,
+                examTitle: exam.title,
+                score: score,
+                correct: correct,
+                incorrect: incorrect,
+                totalQuestions: exam.questions.length,
+                timeSpent: timeFormatted,
+                answers: studentAnswers,
+                timestamp: window.fbFS ? window.fbFS.serverTimestamp() : new Date().toISOString(),
+                submittedAtISO: new Date().toISOString()
+            };
+
+            try {
+                if (window.db && window.fbFS) {
+                    await window.fbFS.addDoc(window.fbFS.collection(window.db, "submissions"), submission);
+                }
+            } catch (e) {
+                console.error("Submission Save Error:", e);
+            }
+
+            document.getElementById("result-student-info").innerText = `শিক্ষার্থী: ${currentStudent.name} (${currentStudent.id}) | পরীক্ষা: ${exam.title}`;
+            document.getElementById("res-total").innerText = exam.questions.length;
+            document.getElementById("res-correct").innerText = correct;
+            document.getElementById("res-incorrect").innerText = incorrect;
+            document.getElementById("res-score").innerText = score;
+
+            renderReviewList();
+            switchView("result");
         }
-    });
-
-    const score = Math.max(0, correct - (incorrect * 0.5));
-    const timeTakenSecs = (exam.timerMinutes * 60) - timeRemaining;
-    const mins = Math.floor(timeTakenSecs / 60);
-    const secs = timeTakenSecs % 60;
-    const timeFormatted = `${mins} মি. ${secs} সে.`;
-
-    const submission = {
-        studentName: currentStudent.name,
-        studentId: currentStudent.id,
-        examKey: activeExamKey,
-        examTitle: exam.title,
-        score: score,
-        correct: correct,
-        incorrect: incorrect,
-        totalQuestions: exam.questions.length,
-        timeSpent: timeFormatted,
-        answers: studentAnswers,
-        timestamp: window.fbFS ? window.fbFS.serverTimestamp() : new Date().toISOString(),
-        submittedAtISO: new Date().toISOString()
-    };
-
-    try {
-        if (window.db && window.fbFS) {
-            await window.fbFS.addDoc(window.fbFS.collection(window.db, "submissions"), submission);
-        }
-    } catch (e) {
-        console.error("Submission Save Error:", e);
-    }
-
-    document.getElementById("result-student-info").innerText = `শিক্ষার্থী: ${currentStudent.name} (${currentStudent.id}) | পরীক্ষা: ${exam.title}`;
-    document.getElementById("res-total").innerText = exam.questions.length;
-
-    // 🔥 লাইভ রেজাল্ট চেক: সময় না হলে মার্কস গোপন রাখা হবে
-    const canShowResult = isAnswerTimeReached(activeExamKey);
-    
-    if (canShowResult) {
-        document.getElementById("res-correct").innerText = correct;
-        document.getElementById("res-incorrect").innerText = incorrect;
-        document.getElementById("res-score").innerText = score;
-    } else {
-        const dateStr = exam.answerReleaseTime ? new Date(exam.answerReleaseTime).toLocaleString('bn-BD', { dateStyle: 'medium', timeStyle: 'short' }) : "লাইভ শেষে";
-        document.getElementById("res-correct").innerText = "গোপন";
-        document.getElementById("res-incorrect").innerText = "গোপন";
-        document.getElementById("res-score").innerHTML = `<span class="text-xs text-amber-600 block leading-tight font-medium">প্রকাশ: ${dateStr}</span>`;
-        
-        showModal("পরীক্ষা সম্পন্ন হয়েছে", `আপনার উত্তরপত্র সফলভাবে জমা হয়েছে। লাইভ পরীক্ষা চলমান থাকায় চূড়ান্ত স্কোর ও বিস্তারিত উত্তর ${dateStr} তারিখে প্রকাশ করা হবে।`);
-    }
-
-    // রিভিউ সেকশন লুকিয়ে রাখা
-    document.getElementById("review-container").classList.add("hidden");
-    switchView("result");
-}
 
         function toggleReviewSection() {
             const canShow = isAnswerTimeReached(activeExamKey);
@@ -1758,95 +1712,91 @@
             renderStudentDashboard(inputId);
         }
 
-       function renderStudentDashboard(studentId) {
-    document.getElementById("student-dash-subtitle").innerText = `স্টুডেন্ট আইডি: ${studentId}`;
-    
-    const routineBtn = document.getElementById("btn-drive-routine");
-    const syllabusBtn = document.getElementById("btn-drive-syllabus");
-    if (routineBtn) routineBtn.href = appData.driveRoutineUrl || "https://drive.google.com";
-    if (syllabusBtn) syllabusBtn.href = appData.driveSyllabusUrl || "https://drive.google.com";
+        function renderStudentDashboard(studentId) {
+            document.getElementById("student-dash-subtitle").innerText = `স্টুডেন্ট আইডি: ${studentId}`;
+            
+            const routineBtn = document.getElementById("btn-drive-routine");
+            const syllabusBtn = document.getElementById("btn-drive-syllabus");
+            if (routineBtn) routineBtn.href = appData.driveRoutineUrl || "https://drive.google.com";
+            if (syllabusBtn) syllabusBtn.href = appData.driveSyllabusUrl || "https://drive.google.com";
 
-    const listContainer = document.getElementById("student-dash-exams-list");
-    listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">পারফরম্যান্স লোড হচ্ছে...</p>`;
+            const listContainer = document.getElementById("student-dash-exams-list");
+            listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">পারফরম্যান্স লোড হচ্ছে...</p>`;
 
-    if (window.db && window.fbFS) {
-        window.fbFS.getDocs(window.fbFS.collection(window.db, "submissions")).then(snapshot => {
-            let subs = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (String(data.studentId).trim() === String(studentId).trim()) {
-                    subs.push(data);
-                }
-            });
+            if (window.db && window.fbFS) {
+                window.fbFS.getDocs(window.fbFS.collection(window.db, "submissions")).then(snapshot => {
+                    let subs = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (String(data.studentId).trim() === String(studentId).trim()) {
+                            subs.push(data);
+                        }
+                    });
 
-            globalStudentSubmissions = subs;
+                    globalStudentSubmissions = subs;
 
-            if (subs.length === 0) {
-                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">আপনার কোনো পরীক্ষার রেকর্ড পাওয়া যায়নি।</p>`;
-                document.getElementById("dash-stat-total-exams").innerText = "০";
-                document.getElementById("dash-stat-avg-acc").innerText = "০%";
-                document.getElementById("dash-stat-best-score").innerText = "০";
-                document.getElementById("dash-stat-avg-score").innerText = "০";
-                document.getElementById("student-dashboard-modal").classList.remove("hidden");
-                return;
+                    if (subs.length === 0) {
+                        listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">আপনার কোনো পরীক্ষার রেকর্ড পাওয়া যায়নি।</p>`;
+                        document.getElementById("dash-stat-total-exams").innerText = "০";
+                        document.getElementById("dash-stat-avg-acc").innerText = "০%";
+                        document.getElementById("dash-stat-best-score").innerText = "০";
+                        document.getElementById("dash-stat-avg-score").innerText = "০";
+                        document.getElementById("student-dashboard-modal").classList.remove("hidden");
+                        return;
+                    }
+
+                    let totalExams = subs.length;
+                    let bestScore = 0;
+                    let totalScore = 0;
+                    let totalAccSum = 0;
+
+                    subs.forEach(s => {
+                        if (s.score > bestScore) bestScore = s.score;
+                        totalScore += s.score;
+                        let acc = (s.correct / s.totalQuestions) * 100;
+                        totalAccSum += isNaN(acc) ? 0 : acc;
+                    });
+
+                    let avgScore = (totalScore / totalExams).toFixed(1);
+                    let avgAcc = Math.round(totalAccSum / totalExams);
+
+                    document.getElementById("dash-stat-total-exams").innerText = totalExams;
+                    document.getElementById("dash-stat-avg-acc").innerText = `${avgAcc}%`;
+                    document.getElementById("dash-stat-best-score").innerText = bestScore;
+                    document.getElementById("dash-stat-avg-score").innerText = avgScore;
+
+                    listContainer.innerHTML = subs.map((sub, sIdx) => {
+                        let dateStr = "সাম্প্রতিক";
+                        if (sub.timestamp && sub.timestamp.toDate) {
+                            dateStr = sub.timestamp.toDate().toLocaleString("bn-BD");
+                        } else if (typeof sub.timestamp === "string") {
+                            dateStr = sub.timestamp;
+                        }
+
+                        const canShow = isAnswerTimeReached(sub.examKey);
+                        const scoreDisplay = canShow ? `স্কোর: ${sub.score}` : `নম্বর গোপন`;
+
+                        return `
+                            <button onclick="openExamDetailPopupByIndex(${sIdx})" class="w-full text-left p-3.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-violet-50/60 transition flex justify-between items-center group shadow-sm cursor-pointer">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-violet-700 transition">${sIdx + 1}. ${sub.examTitle}</h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">তারিখ: ${dateStr}</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-xl text-xs font-mono">${scoreDisplay}</span>
+                                    <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-violet-600 text-xs transition"></i>
+                                </div>
+                            </button>
+                        `;
+                    }).join("");
+
+                    document.getElementById("student-dashboard-modal").classList.remove("hidden");
+                }).catch(err => {
+                    console.error(err);
+                    listContainer.innerHTML = `<p class="text-xs text-rose-500 text-center py-4">ডেটা লোড করতে সমস্যা হয়েছে।</p>`;
+                });
             }
-
-            // 🔥 শুধুমাত্র যে পরীক্ষাগুলোর রেজাল্ট প্রকাশ হয়েছে সেগুলো দিয়ে গড় হিসাব হবে
-            let releasedSubs = subs.filter(s => isAnswerTimeReached(s.examKey));
-            let totalReleased = releasedSubs.length;
-            let bestScore = 0;
-            let totalScore = 0;
-            let totalAccSum = 0;
-
-            releasedSubs.forEach(s => {
-                if (s.score > bestScore) bestScore = s.score;
-                totalScore += s.score;
-                let acc = (s.correct / s.totalQuestions) * 100;
-                totalAccSum += isNaN(acc) ? 0 : acc;
-            });
-
-            let avgScore = totalReleased > 0 ? (totalScore / totalReleased).toFixed(1) : "০";
-            let avgAcc = totalReleased > 0 ? Math.round(totalAccSum / totalReleased) : 0;
-
-            document.getElementById("dash-stat-total-exams").innerText = subs.length;
-            document.getElementById("dash-stat-avg-acc").innerText = `${avgAcc}%`;
-            document.getElementById("dash-stat-best-score").innerText = bestScore;
-            document.getElementById("dash-stat-avg-score").innerText = avgScore;
-
-            listContainer.innerHTML = subs.map((sub, sIdx) => {
-                let dateStr = "সাম্প্রতিক";
-                if (sub.timestamp && sub.timestamp.toDate) {
-                    dateStr = sub.timestamp.toDate().toLocaleString("bn-BD");
-                } else if (typeof sub.timestamp === "string") {
-                    dateStr = sub.timestamp;
-                }
-
-                const canShow = isAnswerTimeReached(sub.examKey);
-                const scoreDisplay = canShow ? 
-                    `<span class="bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-xl text-xs font-mono">স্কোর: ${sub.score}</span>` : 
-                    `<span class="bg-amber-100 text-amber-800 font-semibold px-2.5 py-1 rounded-xl text-xs flex items-center gap-1"><i class="fa-solid fa-lock text-[10px]"></i> ফলাফল গোপন</span>`;
-
-                return `
-                    <button onclick="openExamDetailPopupByIndex(${sIdx})" class="w-full text-left p-3.5 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-violet-50/60 transition flex justify-between items-center group shadow-sm cursor-pointer">
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-violet-700 transition">${sIdx + 1}. ${sub.examTitle}</h4>
-                            <p class="text-[11px] text-slate-500 mt-0.5">তারিখ: ${dateStr}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            ${scoreDisplay}
-                            <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-violet-600 text-xs transition"></i>
-                        </div>
-                    </button>
-                `;
-            }).join("");
-
-            document.getElementById("student-dashboard-modal").classList.remove("hidden");
-        }).catch(err => {
-            console.error(err);
-            listContainer.innerHTML = `<p class="text-xs text-rose-500 text-center py-4">ডেটা লোড করতে সমস্যা হয়েছে।</p>`;
-        });
-    }
-}
+        }
 
         function closeStudentDashboardModal() {
             document.getElementById("student-dashboard-modal").classList.add("hidden");
@@ -1919,87 +1869,67 @@
             document.getElementById("exam-detail-popup-modal").classList.add("hidden");
         }
 
-      function openLeaderboardModal(examKey) {
-    const key = examKey || activeExamKey;
-    if(!key || !appData.exams[key]) {
-        showModal("সতর্কতা", "কোনো এক্সাম সিলেক্ট করা হয়নি।");
-        return;
-    }
-    const ex = appData.exams[key];
-    document.getElementById("lb-modal-title").innerHTML = `<i class="fa-solid fa-trophy text-amber-500 mr-2"></i> ${ex.title} - লিডারবোর্ড`;
-    const tbody = document.getElementById("leaderboard-table-body");
-
-    document.getElementById("leaderboard-modal").classList.remove("hidden");
-
-    // 🔥 লাইভ চলাকালীন লিডারবোর্ড লক করে নোটিশ দেখানো
-    if (!isAnswerTimeReached(key)) {
-        const dateStr = ex.answerReleaseTime ? new Date(ex.answerReleaseTime).toLocaleString('bn-BD', { dateStyle: 'full', timeStyle: 'short' }) : "নির্ধারিত সময়ে";
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="p-8 text-center bg-amber-50/60 rounded-2xl">
-                    <div class="max-w-md mx-auto space-y-2">
-                        <i class="fa-solid fa-lock text-amber-500 text-3xl mb-1"></i>
-                        <h4 class="font-bold text-slate-800 text-sm sm:text-base">লিডারবোর্ড সাময়িকভাবে বন্ধ আছে</h4>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            লাইভ পরীক্ষা চলমান থাকায় মেধা তালিকা গোপন রাখা হয়েছে। ফলাফল প্রকাশের নির্ধারিত সময়ে (<strong>${dateStr}</strong>) পূর্ণাঙ্গ লিডারবোর্ড উন্মুক্ত করা হবে।
-                        </p>
-                    </div>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">ডেটা লোড হচ্ছে...</td></tr>`;
-
-    if (window.db && window.fbFS) {
-        window.fbFS.getDocs(window.fbFS.collection(window.db, "submissions")).then(snapshot => {
-            let subs = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.examKey === key) {
-                    subs.push(data);
-                }
-            });
-
-            subs.sort((a, b) => {
-                if (b.score !== a.score) return b.score - a.score;
-                return a.timeSpent.localeCompare(b.timeSpent);
-            });
-
-            if (subs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">এই পরীক্ষায় এখনো কেউ অংশগ্রহণ করেনি।</td></tr>`;
+        function openLeaderboardModal(examKey) {
+            const key = examKey || activeExamKey;
+            if(!key || !appData.exams[key]) {
+                showModal("সতর্কতা", "কোনো এক্সাম সিলেক্ট করা হয়নি।");
                 return;
             }
+            const ex = appData.exams[key];
+            document.getElementById("lb-modal-title").innerHTML = `<i class="fa-solid fa-trophy text-amber-500 mr-2"></i> ${ex.title} - লিডারবোর্ড`;
+            const tbody = document.getElementById("leaderboard-table-body");
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">ডেটা লোড হচ্ছে...</td></tr>`;
 
-            tbody.innerHTML = subs.map((sub, idx) => {
-                let rankBadge = `${idx + 1}`;
-                if (idx === 0) rankBadge = `<span class="bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full text-xs">1</span>`;
-                else if (idx === 1) rankBadge = `<span class="bg-slate-300 text-slate-900 font-bold px-2 py-0.5 rounded-full text-xs">2</span>`;
-                else if (idx === 2) rankBadge = `<span class="bg-amber-600 text-white font-bold px-2 py-0.5 rounded-full text-xs">3</span>`;
+            document.getElementById("leaderboard-modal").classList.remove("hidden");
 
-                const passMark = ex.passMark !== undefined ? ex.passMark : 1;
-                const isPassed = sub.score >= passMark;
-                const statusBadge = isPassed ? 
-                    `<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">পাস</span>` : 
-                    `<span class="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full font-bold">ফেইল</span>`;
+            if (window.db && window.fbFS) {
+                window.fbFS.getDocs(window.fbFS.collection(window.db, "submissions")).then(snapshot => {
+                    let subs = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.examKey === key) {
+                            subs.push(data);
+                        }
+                    });
 
-                return `
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
-                        <td class="p-2 sm:p-3 text-center font-bold text-slate-700">${rankBadge}</td>
-                        <td class="p-2 sm:p-3 font-semibold text-slate-800">${sub.studentName}</td>
-                        <td class="p-2 sm:p-3 text-center">${statusBadge}</td>
-                        <td class="p-2 sm:p-3 text-center text-slate-500 font-mono text-xs">${sub.timeSpent}</td>
-                        <td class="p-2 sm:p-3 text-right font-black text-indigo-700">${sub.score}</td>
-                    </tr>
-                `;
-            }).join("");
-        }).catch(err => {
-            console.error(err);
-            tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-500">লিডারবোর্ড লোড করতে সমস্যা হয়েছে।</td></tr>`;
-        });
-    }
-}
+                    subs.sort((a, b) => {
+                        if (b.score !== a.score) return b.score - a.score;
+                        return a.timeSpent.localeCompare(b.timeSpent);
+                    });
+
+                    if (subs.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">এই পরীক্ষায় এখনো কেউ অংশগ্রহণ করেনি।</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = subs.map((sub, idx) => {
+                        let rankBadge = `${idx + 1}`;
+                        if (idx === 0) rankBadge = `<span class="bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full text-xs">1</span>`;
+                        else if (idx === 1) rankBadge = `<span class="bg-slate-300 text-slate-900 font-bold px-2 py-0.5 rounded-full text-xs">2</span>`;
+                        else if (idx === 2) rankBadge = `<span class="bg-amber-600 text-white font-bold px-2 py-0.5 rounded-full text-xs">3</span>`;
+
+                        const passMark = ex.passMark !== undefined ? ex.passMark : 1;
+                        const isPassed = sub.score >= passMark;
+                        const statusBadge = isPassed ? 
+                            `<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">পাস</span>` : 
+                            `<span class="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full font-bold">ফেইল</span>`;
+
+                        return `
+                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                                <td class="p-2 sm:p-3 text-center font-bold text-slate-700">${rankBadge}</td>
+                                <td class="p-2 sm:p-3 font-semibold text-slate-800">${sub.studentName}</td>
+                                <td class="p-2 sm:p-3 text-center">${statusBadge}</td>
+                                <td class="p-2 sm:p-3 text-center text-slate-500 font-mono text-xs">${sub.timeSpent}</td>
+                                <td class="p-2 sm:p-3 text-right font-black text-indigo-700">${sub.score}</td>
+                            </tr>
+                        `;
+                    }).join("");
+                }).catch(err => {
+                    console.error(err);
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500">লিডারবোর্ড লোড করতে সমস্যা হয়েছে।</td></tr>`;
+                });
+            }
+        }
 
         function closeLeaderboardModal() {
             document.getElementById("leaderboard-modal").classList.add("hidden");
@@ -2141,134 +2071,37 @@
             }
         }
 
-        // ১. স্টুডেন্ট তালিকা রেন্ডার করা (এডিট বাটন সহ)
-function renderTeacherStudentIdsTab() {
-    const select = document.getElementById("new-student-course-select");
-    if (select) {
-        select.innerHTML = `<option value="ALL">সকল কোর্স (All Courses)</option>` + 
-            appData.courses.map(c => `<option value="${c}">${c}</option>`).join('');
-    }
+        function renderTeacherStudentIdsTab() {
+            const container = document.getElementById("allowed-ids-list-container");
+            container.innerHTML = appData.allowedStudentIds.map((item, idx) => `
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 flex justify-between items-center text-xs sm:text-sm">
+                    <div>
+                        <span class="font-mono font-bold text-indigo-700">${item.id}</span>
+                        <span class="text-slate-700 ml-2">- ${item.name}</span>
+                    </div>
+                    <button onclick="handleDeleteStudentId(${idx})" class="text-rose-600 hover:text-rose-800 font-semibold text-xs px-2 py-1">মুছুন</button>
+                </div>
+            `).join('');
 
-    const container = document.getElementById("allowed-ids-list-container");
-    if (!container) return;
-
-    if (!appData.allowedStudentIds || appData.allowedStudentIds.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">কোনো অনুমোদিত আইডি নেই।</p>`;
-        return;
-    }
-
-    container.innerHTML = appData.allowedStudentIds.map((item, idx) => {
-        let assignedCourseText = "সকল কোর্স";
-        if (Array.isArray(item.courses)) {
-            assignedCourseText = item.courses.includes("ALL") ? "সকল কোর্স" : item.courses.join(", ");
-        } else if (item.course) {
-            assignedCourseText = item.course === "ALL" ? "সকল কোর্স" : item.course;
+            renderEnrollRequestsList();
         }
 
-        return `
-            <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 flex justify-between items-center text-xs sm:text-sm">
-                <div>
-                    <span class="font-mono font-bold text-indigo-700">${item.id}</span>
-                    <span class="text-slate-700 ml-2 font-medium">- ${item.name}</span>
-                    <span class="inline-block bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 border border-indigo-200">
-                        ${assignedCourseText}
-                    </span>
-                </div>
-                <div class="flex gap-1.5 shrink-0">
-                    <button onclick="openEditStudentModal(${idx})" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-xs px-2.5 py-1 rounded-lg transition cursor-pointer">
-                        এডিট
-                    </button>
-                    <button onclick="handleDeleteStudentId(${idx})" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-medium text-xs px-2.5 py-1 rounded-lg transition cursor-pointer">
-                        মুছুন
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    renderEnrollRequestsList();
-}
-
-// ২. এডিট মোডাল খোলার ফাংশন
-function openEditStudentModal(idx) {
-    const student = appData.allowedStudentIds[idx];
-    if (!student) return;
-
-    document.getElementById("edit-student-idx").value = idx;
-    document.getElementById("edit-student-id").value = student.id;
-    document.getElementById("edit-student-name").value = student.name;
-
-    const courseSelect = document.getElementById("edit-student-course");
-    courseSelect.innerHTML = `<option value="ALL">সকল কোর্স (All Courses)</option>` +
-        appData.courses.map(c => `<option value="${c}">${c}</option>`).join('');
-
-    let currentCourse = "ALL";
-    if (Array.isArray(student.courses) && student.courses.length > 0) {
-        currentCourse = student.courses[0];
-    } else if (student.course) {
-        currentCourse = student.course;
-    }
-    courseSelect.value = currentCourse;
-
-    document.getElementById("edit-student-modal").classList.remove("hidden");
-}
-
-// ৩. এডিট মোডাল বন্ধ করার ফাংশন
-function closeEditStudentModal() {
-    document.getElementById("edit-student-modal").classList.add("hidden");
-}
-
-// ৪. স্টুডেন্ট তথ্য ও কোর্স আপডেট সেভ করার ফাংশন
-async function handleUpdateStudent(e) {
-    e.preventDefault();
-    const idx = parseInt(document.getElementById("edit-student-idx").value);
-    const newId = document.getElementById("edit-student-id").value.trim();
-    const newName = document.getElementById("edit-student-name").value.trim();
-    const selectedCourse = document.getElementById("edit-student-course").value;
-
-    // চেক করা নতুন আইডি অন্য কারও আইডির সাথে মিলে যায় কি না
-    const isDuplicate = appData.allowedStudentIds.some((item, i) => i !== idx && String(item.id).trim() === newId);
-    if (isDuplicate) {
-        showModal("সতর্কতা", "এই স্টুডেন্ট আইডিটি ইতিমধ্যে তালিকায় বিদ্যমান।");
-        return;
-    }
-
-    appData.allowedStudentIds[idx] = {
-        id: newId,
-        name: newName,
-        courses: [selectedCourse]
-    };
-
-    await saveDataToFirebase();
-    closeEditStudentModal();
-    renderTeacherStudentIdsTab();
-    showModal("সফল", "শিক্ষার্থীর তথ্য ও কোর্স এক্সেস সফলভাবে আপডেট হয়েছে।");
-}
-
         async function handleAddStudentId(e) {
-                e.preventDefault();
-                const id = document.getElementById("new-student-id-input").value.trim();
-                const name = document.getElementById("new-student-name-input").value.trim();
-                const selectedCourse = document.getElementById("new-student-course-select").value;
+            e.preventDefault();
+            const id = document.getElementById("new-student-id-input").value.trim();
+            const name = document.getElementById("new-student-name-input").value.trim();
 
-                if (appData.allowedStudentIds.some(item => String(item.id).trim() === id)) {
-                    showModal("সতর্কতা", "এই স্টুডেন্ট আইডিটি ইতিমধ্যে তালিকায় রয়েছে।");
-                    return;
-                }
-
-                // আইডির সাথে অনুমোদিত কোর্স অ্যারে হিসেবে রাখা
-                appData.allowedStudentIds.push({ 
-                    id: id, 
-                    name: name, 
-                    courses: [selectedCourse] 
-                });
-
-                document.getElementById("new-student-id-input").value = "";
-                document.getElementById("new-student-name-input").value = "";
-                await saveDataToFirebase();
-                renderTeacherStudentIdsTab();
-                showModal("সফল", "শিক্ষার্থীকে নির্ধারিত কোর্সে সফলভাবে এক্সেস দেওয়া হয়েছে।");
+            if (appData.allowedStudentIds.some(item => String(item.id).trim() === id)) {
+                showModal("সতর্কতা", "এই স্টুডেন্ট আইডিটি ইতিমধ্যে তালিকায় রয়েছে।");
+                return;
             }
+
+            appData.allowedStudentIds.push({ id, name });
+            document.getElementById("new-student-id-input").value = "";
+            document.getElementById("new-student-name-input").value = "";
+            await saveDataToFirebase();
+            renderTeacherStudentIdsTab();
+        }
 
         async function handleDeleteStudentId(idx) {
             if (confirm("আপনি কি এই স্টুডেন্ট আইডিটি মুছে ফেলতে চান?")) {

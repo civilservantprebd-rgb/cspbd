@@ -1466,17 +1466,17 @@
             switchView("student-reg");
         }
 
-        function beginQuiz(e) {
-            e.preventDefault();
+        async function beginQuiz(e) {
+            if (e && e.preventDefault) e.preventDefault();
             const rawName = document.getElementById("student-name").value.trim();
             const rawId = document.getElementById("student-id").value.trim();
-
+        
             const exam = appData.exams[activeExamKey];
             if(!exam || !exam.questions || exam.questions.length === 0) {
                 showModal("ত্রুটি", "এই পরীক্ষায় কোনো প্রশ্ন নেই!");
                 return;
             }
-
+        
             let matchedStudent = null;
             if (!exam.isFree) {
                 if (!appData.allowedStudentIds || appData.allowedStudentIds.length === 0) {
@@ -1489,26 +1489,54 @@
                     return;
                 }
             }
-
+        
+            // ========================================================
+            // 🔥 লাইভ পরীক্ষা চলাকালীন ২য় বার সাবমিশন ঠেকানোর লজিক
+            // ========================================================
+            const checkId = rawId || (matchedStudent ? matchedStudent.id : "");
+            if (isExamCurrentlyLive(activeExamKey) && checkId) {
+                if (window.db && window.fbFS) {
+                    try {
+                        const snapshot = await window.fbFS.getDocs(window.fbFS.collection(window.db, "submissions"));
+                        let alreadySubmitted = false;
+                        
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            if (String(data.studentId).trim() === String(checkId).trim() && data.examKey === activeExamKey) {
+                                alreadySubmitted = true;
+                            }
+                        });
+        
+                        if (alreadySubmitted) {
+                            showModal("অনুমতি নেই", "আপনি ইতিমধ্যে এই লাইভ পরীক্ষায় অংশগ্রহণ করেছেন! লাইভ পরীক্ষা চলাকালীন একাধিকবার পরীক্ষা দেওয়া যাবে না। লাইভ শেষ হওয়ার পর আপনি যতবার খুশি প্র্যাকটিস করতে পারবেন।");
+                            return;
+                        }
+                    } catch (err) {
+                        console.error("Live exam submission check failed:", err);
+                    }
+                }
+            }
+            // ========================================================
+        
             let foundStudentName = rawName;
             if (matchedStudent && matchedStudent.name) {
                 foundStudentName = matchedStudent.name;
             } else if (!foundStudentName) {
                 foundStudentName = rawId ? `আইডি: ${rawId}` : "পরীক্ষার্থী";
             }
-
+        
             currentStudent = {
                 name: foundStudentName,
                 id: rawId || "ফ্রি-ইউজার"
             };
-
+        
             currentExamQuestions = [...exam.questions];
             studentAnswers = new Array(currentExamQuestions.length).fill(null);
-
+        
             document.getElementById("quiz-exam-heading").innerText = `${exam.title} (${exam.course} - ${exam.subject})`;
             timeRemaining = exam.timerMinutes * 60;
             updateTimerDisplay();
-
+        
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 timeRemaining--;
@@ -1519,7 +1547,7 @@
                     finishQuiz();
                 }
             }, 1000);
-
+        
             renderAllQuestions();
             switchView("exam");
         }
@@ -2531,6 +2559,27 @@ function forceStartQuizView() {
     // যেমন: document.getElementById('view-quiz-page')?.classList.remove('hidden');
     
     console.log("ফ্রি পরীক্ষা ভিউ চালু হয়েছে।");
+}
+
+        // পরীক্ষাটি বর্তমানে লাইভ চলমান কি না যাচাই করার ফাংশন
+function isExamCurrentlyLive(examKey) {
+    const exam = appData.exams[examKey];
+    if (!exam || !exam.startTime) return false; // লাইভ শুরুর সময় না থাকলে এটি রেগুলার এক্সাম
+    
+    const now = new Date();
+    const startTime = new Date(exam.startTime);
+    if (now < startTime) return false; // পরীক্ষা এখনো শুরু হয়নি
+    
+    // উত্তর প্রকাশের সময় বা লাইভ শেষ সময় পার হয়ে গেলে এটি আর লাইভ নয়
+    if (exam.answerReleaseTime) {
+        const releaseTime = new Date(exam.answerReleaseTime);
+        if (now >= releaseTime) return false;
+    } else if (exam.leaderboardEndTime) {
+        const endTime = new Date(exam.leaderboardEndTime);
+        if (now >= endTime) return false;
+    }
+    
+    return true; // পরীক্ষাটি বর্তমানে লাইভ চলছে
 }
     </script>
 </body>

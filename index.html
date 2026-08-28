@@ -29,6 +29,12 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
         import { 
+                getAuth, 
+                signInWithEmailAndPassword, 
+                onAuthStateChanged, 
+                signOut 
+            } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+        import { 
             getFirestore, 
             collection, 
             addDoc, 
@@ -64,6 +70,63 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
+
+
+        window.verifyTeacherLogin = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("teacher-email-input").value;
+            const pass = document.getElementById("teacher-pass-input").value;
+    
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+                
+                // লগইন সফল হলে
+                closeTeacherLoginModal();
+                showModal("সফল", "শিক্ষক প্যানেলে স্বাগতম!");
+                switchView("teacher");
+                
+            } catch (error) {
+                console.error("Login Error:", error.code);
+                showModal("লগইন ব্যর্থ", "ভুল ইমেইল অথবা পাসওয়ার্ড দিয়েছেন।");
+            }
+        };
+    
+        // লগআউট ফাংশন
+        window.handleLogout = () => {
+            signOut(auth).then(() => {
+                switchView("dashboard");
+                location.reload(); // পেজ রিফ্রেশ করে সেশন ক্লিয়ার করা
+            });
+        };
+    
+        // অটো লগইন চেক (Auth State Listener)
+        // Auth State Listener (লগইন স্ট্যাটাস চেক)
+        onAuthStateChanged(auth, (user) => {
+            const logoutBtn = document.getElementById('logout-btn-footer');
+            if (user) {
+                // লগইন থাকলে বাটন দেখাও
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                console.log("Logged in as:", user.email);
+            } else {
+                // লগইন না থাকলে বাটন লুকাও
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                console.log("Not logged in");
+            }
+        });
+        
+        // লগআউট ফাংশন
+        window.handleLogout = () => {
+            if (confirm("আপনি কি নিশ্চিতভাবে লগআউট করতে চান?")) {
+                signOut(auth).then(() => {
+                    alert("লগআউট সফল হয়েছে।");
+                    switchView('dashboard'); // হোম পেজে নিয়ে যাবে
+                    location.reload(); // রিফ্রেশ করবে যাতে মেমোরি থেকে ডেটা ক্লিয়ার হয়
+                }).catch((error) => {
+                    console.error("Logout Error:", error);
+                });
+            }
+        };
 
         // Make Firebase Firestore accessible globally
         window.db = db;
@@ -690,6 +753,10 @@
                 <button onclick="openTeacherLoginModal()" class="bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-chalkboard-user text-amber-300"></i> শিক্ষক প্যানেল
                 </button>
+                
+                <button id="logout-btn-footer" onclick="handleLogout()" class="hidden bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500/40 text-rose-200 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                <i class="fa-solid fa-right-from-bracket text-rose-400"></i> লগআউট
+                </button>
             </div>
         </div>
     </footer>
@@ -839,15 +906,19 @@
                     <i class="fa-solid fa-lock"></i>
                 </div>
                 <h3 class="text-lg font-bold text-slate-900">শিক্ষক প্যানেল লগইন</h3>
-                <p class="text-xs text-slate-500 mt-1">প্যানেলে প্রবেশ করতে পাসওয়ার্ড দিন</p>
             </div>
-            <form onsubmit="verifyTeacherPassword(event)" class="space-y-4">
+            <form onsubmit="verifyTeacherLogin(event)" class="space-y-4">
                 <div>
-                    <input type="password" id="teacher-pass-input" required placeholder="পাসওয়ার্ড দিন" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs sm:text-sm">
+                    <label class="block text-xs font-medium text-slate-600 mb-1">ইমেইল</label>
+                    <input type="email" id="teacher-email-input" required placeholder="admin@example.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">পাসওয়ার্ড</label>
+                    <input type="password" id="teacher-pass-input" required placeholder="******" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
                 </div>
                 <div class="flex gap-2">
-                    <button type="button" onclick="closeTeacherLoginModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl transition text-xs sm:text-sm">বাতিল</button>
-                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition text-xs sm:text-sm shadow">প্রবেশ করুন</button>
+                    <button type="button" onclick="closeTeacherLoginModal()" class="flex-1 bg-slate-100 py-2.5 rounded-xl text-sm">বাতিল</button>
+                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-2.5 rounded-xl text-sm shadow">লগইন</button>
                 </div>
             </form>
         </div>
